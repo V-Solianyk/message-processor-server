@@ -11,31 +11,37 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class ServerHandler {
-    private static final String FILE_NAME_FOR_COMMAND = "Commands.txt";
+public class ClientInteractionHandler {
+    private static final String FILE_NAME_FOR_COMMAND = "src/main/resources/Commands.txt";
     private static final String ALPHABETIC_PATTERN = ".*[a-zA-Z]+.*";
     private static final String NUMERIC_PATTERN = "\\d+";
     private static final int MULTIPLIER = 1000;
-    private static final Logger LOGGER = LogManager.getLogger(ServerHandler.class.getName());
+    private static final Logger LOGGER = LogManager.getLogger(ClientInteractionHandler
+            .class.getName());
 
     private final Socket socket;
 
-    public ServerHandler(Socket socket) {
+    public ClientInteractionHandler(Socket socket) {
         this.socket = socket;
     }
 
-    public void run() {
+    public void handleClientInput() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(socket
                 .getInputStream()));
-             PrintWriter outputToClient = new PrintWriter(socket.getOutputStream(), true)) {
-            String input;
-            while ((input = reader.readLine()) != null) {
-                String response = processClientInput(input);
-                outputToClient.println(response);
-                LOGGER.info("Received: " + input + ", Server answer: " + response);
-            }
+                PrintWriter outputToClient = new PrintWriter(socket.getOutputStream(), true)) {
+            manageClientCommunication(reader, outputToClient);
         } catch (IOException e) {
             LOGGER.error("The client finished connect with the server");
+        }
+    }
+
+    private void manageClientCommunication(BufferedReader reader,
+                                           PrintWriter outputToClient) throws IOException {
+        String input;
+        while ((input = reader.readLine()) != null) {
+            String response = processClientInput(input);
+            outputToClient.println(response);
+            LOGGER.info("Received: " + input + ", " + response);
         }
     }
 

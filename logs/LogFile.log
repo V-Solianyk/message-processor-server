@@ -1,19 +1,1 @@
 
-Server started. Waiting for client...
-Counter 0, Time 06.11.2023 16:52:05
-Received from client: vlad
-Counter 1, Time 06.11.2023 16:52:15
-Counter 2, Time 06.11.2023 16:52:25
-Counter 3, Time 06.11.2023 16:52:35
-Counter 4, Time 06.11.2023 16:52:45
-Counter 5, Time 06.11.2023 16:52:55
-Counter 6, Time 06.11.2023 16:53:05
-Counter 7, Time 06.11.2023 16:53:15
-Counter 8, Time 06.11.2023 16:53:25
-Server started. Waiting for client...
-Received from client: vlad
-Server started. Waiting for client...
-Server started. Waiting for client...
-Server started. Waiting for client...
-Received: vlad, Server answer: Server answer: VlAd
-Received: command1, Server answer: Server answer: get_data
