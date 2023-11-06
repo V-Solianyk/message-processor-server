@@ -7,21 +7,13 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import org.example.server.ServerApp;
 
-public class ServerHandler implements Runnable {
+public class ServerHandler {
     private static final String FILE_NAME_FOR_COMMAND = "Commands.txt";
     private static final String FILE_NAME_FOR_LOGGING = "LogFile.txt";
     private static final String ALPHABETIC_PATTERN = ".*[a-zA-Z]+.*";
     private static final String NUMERIC_PATTERN = "\\d+";
     private static final int MULTIPLIER = 1000;
-    private static final int COUNT_OF_THREADS = 1;
-    private static final int PERIOD = 10;
 
     private final Socket socket;
 
@@ -29,35 +21,19 @@ public class ServerHandler implements Runnable {
         this.socket = socket;
     }
 
-    @Override
     public void run() {
-        ScheduledExecutorService scheduler = null;
-        try (BufferedReader inputFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        try (BufferedReader inputFromClient = new BufferedReader(new InputStreamReader(socket
+                .getInputStream()));
              PrintWriter outputToClient = new PrintWriter(socket.getOutputStream(), true)) {
-            scheduler = Executors.newScheduledThreadPool(COUNT_OF_THREADS);
-            scheduler.scheduleAtFixedRate(() -> {
-                ServerApp.incrementClientCounter(socket);
-                int counter = ServerApp.getClientCounter(socket);
-                sendPeriodicMessage(counter);
-            }, 0, PERIOD, TimeUnit.SECONDS);
-
             String input;
-            while ((input = inputFromClient.readLine()) != null) {
-                System.out.println("Received from client: " + input);
-
-                String response = processClientInput(input);
-                outputToClient.println(response);
-
-                writeToLogFile("Received: " + input, "Server response: " + response);
-            }
+                while ((input = inputFromClient.readLine()) != null) {
+                    System.out.println("Received from client: " + input);
+                    String response = processClientInput(input);
+                    outputToClient.println(response);
+                    writeToLogFile("Received: " + input, "Server answer: " + response);
+                }
         } catch (IOException e) {
-            throw new RuntimeException("An error occurred while handling client's request: "
-                    + e.getMessage(), e);
-
-        } finally {
-            if (scheduler != null) {
-                scheduler.shutdown();
-            }
+            System.out.println("The client finished connect with the server");
         }
     }
 
@@ -120,27 +96,6 @@ public class ServerHandler implements Runnable {
         } catch (IOException e) {
             throw new RuntimeException("Can't write the message to the logFile: "
                     + FILE_NAME_FOR_LOGGING, e);
-        }
-    }
-
-    private void writePeriodicMessageToLogFile(String sent) {
-        try (FileWriter writer = new FileWriter(FILE_NAME_FOR_LOGGING, true)) {
-            writer.write(sent + "\n");
-        } catch (IOException e) {
-            throw new RuntimeException("Can't write the periodic message to the logFile: "
-                    + FILE_NAME_FOR_LOGGING, e);
-        }
-    }
-
-    private void sendPeriodicMessage(int counter) {
-        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss"));
-        String message = "Counter " + counter + ", Time " + currentTime;
-        try (PrintWriter outputToClient = new PrintWriter(socket.getOutputStream(), true)) {
-//            outputToClient.println(message);
-            writePeriodicMessageToLogFile(message);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to send periodic message to the client. Please "
-                    + "check the connection and try again.", e);
         }
     }
 }
