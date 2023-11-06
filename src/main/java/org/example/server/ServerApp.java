@@ -24,39 +24,59 @@ public class ServerApp {
             .newScheduledThreadPool(COUNT_OF_THREADS);
 
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
+        try (ServerSocket serverSocket = new ServerSocket(PORT);
+             Socket clientSocket = serverSocket.accept();
+             OutputStream output = clientSocket.getOutputStream();
+             PrintWriter printWriter = new PrintWriter(output, true);
+             FileWriter fileWriter = new FileWriter(FILE_NAME_FOR_LOGGING, true)) {
             System.out.println("Server started. Waiting for client...");
-            Socket clientSocket = serverSocket.accept();
-            executor.scheduleAtFixedRate(() -> sendPeriodicMessageToTheClients(clientSocket),
+            executor.scheduleAtFixedRate(() -> sendPeriodicMessageToTheClients(printWriter, fileWriter),
                     0, PERIOD, TimeUnit.SECONDS);
             ServerHandler serverHandler = new ServerHandler(clientSocket);
-                serverHandler.run();
-
+            serverHandler.run();
         } catch (IOException e) {
             throw new RuntimeException("An error occurred while running the server or accepting" +
                     " client connections: " + e.getMessage(), e);
         }
     }
 
-    private static void writePeriodicMessageToLogFile(String message) {
-        try (FileWriter writer = new FileWriter(FILE_NAME_FOR_LOGGING, true)) {
-            writer.write(message + "\n");
-        } catch (IOException e) {
+    private static void writePeriodicMessageToLogFile(String message, FileWriter fileWriter) {
+        try {
+            fileWriter.write(message + "\n");
+        } catch (IOException ex) {
             throw new RuntimeException("Can't write the periodic message to the logFile: "
-                    + FILE_NAME_FOR_LOGGING, e);
+                    + FILE_NAME_FOR_LOGGING, ex);
         }
     }
 
-    private static void sendPeriodicMessageToTheClients(Socket socket) {
-        try (OutputStream output = socket.getOutputStream();
-             PrintWriter writer = new PrintWriter(output, true)) {
-            String currentTime = LocalDateTime.now().format(DateTimeFormatter
-                    .ofPattern(DATE_PATTERN));
-            String message = "Counter " + counter++ + ", Time " + currentTime;
-            writer.println(message);
-            writePeriodicMessageToLogFile(message);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+    private static void sendPeriodicMessageToTheClients(PrintWriter printWriter, FileWriter fileWriter) {
+        String currentTime = LocalDateTime.now().format(DateTimeFormatter
+                .ofPattern(DATE_PATTERN));
+        String message = "Counter " + counter++ + ", Time " + currentTime;
+        writePeriodicMessageToLogFile(message, fileWriter);
+        printWriter.println(message);
     }
+
+//    private static void writePeriodicMessageToLogFile(String message) {
+//        try (FileWriter writer = new FileWriter(FILE_NAME_FOR_LOGGING, true)) {
+//            writer.write(message + "\n");
+//        } catch (IOException e) {
+//            throw new RuntimeException("Can't write the periodic message to the logFile: "
+//                    + FILE_NAME_FOR_LOGGING, e);
+//        }
+//    }
+
+//private static void sendPeriodicMessageToTheClients(Socket socket) {
+//    try (OutputStream output = socket.getOutputStream();
+//         PrintWriter writer = new PrintWriter(output, true)) {
+//        String currentTime = LocalDateTime.now().format(DateTimeFormatter
+//                .ofPattern(DATE_PATTERN));
+//        String message = "Counter " + counter++ + ", Time " + currentTime;
+//        writer.println(message);
+//        writePeriodicMessageToLogFile(message);
+//    } catch (IOException e) {
+//        e.printStackTrace();
+//    }
+//}
 }

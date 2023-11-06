@@ -1,24 +1,5 @@
 
-Counter 0, Time 05.11.2023 23:17:26
-Counter 0, Time 05.11.2023 23:22:14
-Counter 0, Time 05.11.2023 23:25:09
-Counter 0, Time 05.11.2023 23:27:29
-Counter 0, Time 05.11.2023 23:32:13
+Received: мдфв, Server answer: Command not found
 Received: vlad, Server answer: VlAd
-Counter 0, Time 05.11.2023 23:35:24
-Counter 0, Time 05.11.2023 23:36:29
-Counter 0, Time 05.11.2023 23:37:47
-Counter 0, Time 05.11.2023 23:41:06
-Received: vlad, Server answer: VlAd
-Counter 0, Time 05.11.2023 23:43:11
 Received: 2, Server answer: 2000
-Counter 0, Time 05.11.2023 23:43:46
-Counter 0, Time 05.11.2023 23:44:10
-Counter 0, Time 05.11.2023 23:45:44
-Received: 2, Server answer: 2000
-Counter 0, Time 06.11.2023 09:22:31
-Counter 0, Time 06.11.2023 09:27:43
-Counter 0, Time 06.11.2023 09:29:11
-Received: 2, Server answer: 2000
-Counter 0, Time 06.11.2023 09:35:15
-Counter 0, Time 06.11.2023 09:41:38
+Received: , Server answer: Command not found
