@@ -1,6 +1,5 @@
 package org.example.server;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -13,7 +12,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.server.handler.ServerHandler;
+import org.example.server.handler.ClientInteractionHandler;
 
 public class ServerApp {
     private static final int PORT = 3344;
@@ -27,21 +26,25 @@ public class ServerApp {
 
     public static void main(String[] args) {
         LOGGER.info("Server started. Waiting for client...");
+        startServer();
+    }
+
+    private static void startServer() {
         try (ServerSocket serverSocket = new ServerSocket(PORT);
-             Socket clientSocket = serverSocket.accept();
-             OutputStream output = clientSocket.getOutputStream();
-             PrintWriter printWriter = new PrintWriter(output, true)) {
-            executor.scheduleAtFixedRate(() -> sendPeriodicMessageToTheClients(printWriter),
+                Socket clientSocket = serverSocket.accept();
+                OutputStream output = clientSocket.getOutputStream();
+                PrintWriter printWriter = new PrintWriter(output, true)) {
+            executor.scheduleAtFixedRate(() -> sendPeriodicTechnicalMessageToClients(printWriter),
                     0, PERIOD, TimeUnit.SECONDS);
-            ServerHandler serverHandler = new ServerHandler(clientSocket);
-            serverHandler.run();
+            ClientInteractionHandler serverHandler = new ClientInteractionHandler(clientSocket);
+            serverHandler.handleClientInput();
         } catch (IOException e) {
-            LOGGER.error("An error occurred while running the server or accepting" +
-                    " client connections: " + e.getMessage(), e);
+            LOGGER.error("An error occurred while running the server or accepting"
+                    + " client connections: " + e.getMessage(), e);
         }
     }
 
-    private static void sendPeriodicMessageToTheClients(PrintWriter printWriter) {
+    private static void sendPeriodicTechnicalMessageToClients(PrintWriter printWriter) {
         String currentTime = LocalDateTime.now().format(DateTimeFormatter
                 .ofPattern(DATE_PATTERN));
         String message = "Counter " + counter++ + ", Time " + currentTime;
