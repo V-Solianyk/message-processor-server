@@ -1,5 +1,0 @@
-
-Received: мдфв, Server answer: Command not found
-Received: vlad, Server answer: VlAd
-Received: 2, Server answer: 2000
-Received: , Server answer: Command not found
