@@ -8,21 +8,18 @@ import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.server.handler.ClientInteractionHandler;
 
 public class ServerApp {
+    private static final Logger LOGGER = LogManager.getLogger(ServerApp.class.getName());
     private static final int PORT = 3344;
     private static final int COUNT_OF_THREADS = 1;
     private static final int PERIOD = 10;
     private static final String DATE_PATTERN = "dd.MM.yyyy HH:mm:ss";
     private static int counter = 0;
-    private static final Logger LOGGER = LogManager.getLogger(ServerApp.class.getName());
-    private static final ScheduledExecutorService executor = Executors
-            .newScheduledThreadPool(COUNT_OF_THREADS);
 
     public static void main(String[] args) {
         LOGGER.info("Server started. Waiting for client...");
@@ -34,8 +31,9 @@ public class ServerApp {
                 Socket clientSocket = serverSocket.accept();
                 OutputStream output = clientSocket.getOutputStream();
                 PrintWriter printWriter = new PrintWriter(output, true)) {
-            executor.scheduleAtFixedRate(() -> sendPeriodicTechnicalMessageToClients(printWriter),
-                    0, PERIOD, TimeUnit.SECONDS);
+            Executors.newScheduledThreadPool(COUNT_OF_THREADS)
+                    .scheduleAtFixedRate(() -> sendPeriodicTechnicalMessageToClients(printWriter),
+                        PERIOD, PERIOD, TimeUnit.SECONDS);
             ClientInteractionHandler serverHandler = new ClientInteractionHandler(clientSocket);
             serverHandler.handleClientInput();
         } catch (IOException e) {
@@ -47,7 +45,7 @@ public class ServerApp {
     private static void sendPeriodicTechnicalMessageToClients(PrintWriter printWriter) {
         String currentTime = LocalDateTime.now().format(DateTimeFormatter
                 .ofPattern(DATE_PATTERN));
-        String message = "Counter " + counter++ + ", Time " + currentTime;
+        String message = String.format("Counter %d, Time %s", counter++, currentTime);
         printWriter.println(message);
     }
 }

@@ -12,12 +12,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ClientInteractionHandler {
-    private static final String FILE_NAME_FOR_COMMAND = "src/main/resources/Commands.txt";
-    private static final String ALPHABETIC_PATTERN = ".*[a-zA-Z]+.*";
-    private static final String NUMERIC_PATTERN = "\\d+";
-    private static final int MULTIPLIER = 1000;
     private static final Logger LOGGER = LogManager.getLogger(ClientInteractionHandler
             .class.getName());
+    private static final String FILE_NAME_FOR_COMMAND = "src/main/resources/Commands.txt";
+    private static final String NUMERIC_PATTERN = "\\d+";
+    private static final int MULTIPLIER = 1000;
 
     private final Socket socket;
 
@@ -31,7 +30,7 @@ public class ClientInteractionHandler {
                 PrintWriter outputToClient = new PrintWriter(socket.getOutputStream(), true)) {
             manageClientCommunication(reader, outputToClient);
         } catch (IOException e) {
-            LOGGER.error("The client finished connect with the server");
+            LOGGER.error("The client finished connection with the server");
         }
     }
 
@@ -41,45 +40,20 @@ public class ClientInteractionHandler {
         while ((input = reader.readLine()) != null) {
             String response = processClientInput(input);
             outputToClient.println(response);
-            LOGGER.info("Received: " + input + ", " + response);
+            LOGGER.info(String.format("Received: %s, %s", input, response));
         }
     }
 
     private String processClientInput(String input) {
         String command = processCommand(input);
         if (command.equals("Command not found")) {
-            if (input.matches(ALPHABETIC_PATTERN)) {
-                return modifyString(input);
-            } else if (input.matches(NUMERIC_PATTERN)) {
+            if (input.matches(NUMERIC_PATTERN)) {
                 return multiplyByThousand(input);
+            } else {
+                return modifyString(input);
             }
         }
         return "Server answer: " + command;
-    }
-
-    private String modifyString(String message) {
-        StringBuilder result = new StringBuilder();
-        boolean toUpperCase = true;
-        for (char c : message.toCharArray()) {
-            if (Character.isLetter(c)) {
-                if (toUpperCase) {
-                    result.append(Character.toUpperCase(c));
-                } else {
-                    result.append(Character.toLowerCase(c));
-                }
-                toUpperCase = !toUpperCase;
-            } else if (c == ' ') {
-                result.append('_');
-            } else {
-                result.append(c);
-            }
-        }
-        return "Server answer: " + result;
-    }
-
-    private String multiplyByThousand(String message) {
-        int number = Integer.parseInt(message);
-        return "Server answer: " + (number * MULTIPLIER);
     }
 
     private String processCommand(String input) {
@@ -96,5 +70,30 @@ public class ClientInteractionHandler {
                     + FILE_NAME_FOR_COMMAND, e);
         }
         return "Command not found";
+    }
+
+    private String multiplyByThousand(String message) {
+        int number = Integer.parseInt(message);
+        return "Server answer: " + (number * MULTIPLIER);
+    }
+
+    private String modifyString(String message) {
+        StringBuilder result = new StringBuilder();
+        boolean toUpperCase = true;
+        for (char symbol : message.toCharArray()) {
+            if (Character.isLetter(symbol)) {
+                if (toUpperCase) {
+                    result.append(Character.toUpperCase(symbol));
+                } else {
+                    result.append(Character.toLowerCase(symbol));
+                }
+                toUpperCase = !toUpperCase;
+            } else if (symbol == ' ') {
+                result.append('_');
+            } else {
+                result.append(symbol);
+            }
+        }
+        return "Server answer: " + result;
     }
 }
